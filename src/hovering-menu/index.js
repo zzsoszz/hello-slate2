@@ -127,6 +127,7 @@ function insertImage(change, src, target) {
 }
 
 
+
 class Sidebar  extends React.Component{
     constructor(props){
         super(props);
@@ -144,7 +145,7 @@ class Sidebar  extends React.Component{
         if (!sidebarEle) return;
         if (value.isBlurred ) {
             //sidebarEle.removeAttribute('style')
-            this.sidebarEle.style.opacity = 0;
+            this.sidebarEle.style.opacity = 1;
             return
         }
         const selection = window.getSelection()
@@ -156,14 +157,44 @@ class Sidebar  extends React.Component{
         this.sidebarEle.style.top = `${rect.top-sidebarEle.parentElement.getBoundingClientRect().top}px`  ;//+ window.scrollY - sidebarEle.offsetHeight
         this.sidebarEle.style.left ="-40px";
     }
+    onImageSelected=(e)=>{
+    	console.log(e.target.files);
+    	var file=e.target.files[0];
+    	e.target.value='';
+    	const { value, onChange } = this.props;
+		var reader  = new FileReader();
+
+		reader.addEventListener("load", function () {
+		    var src = reader.result;
+
+		    var changed=value.change().insertBlock({
+		        type: 'image',
+		        isVoid: true,
+		        data: {
+		            src,
+		            alignment:"left"
+		        }
+		    });
+		    onChange(changed);
+
+		}, false);
+
+
+		if (file) {
+		    reader.readAsDataURL(file);
+		}
+    }
     sidebar = (ele) => {
         this.sidebarEle = ele;
     }
     render(){
        console.log("render");
        return (
-            <div  ref={this.sidebar}>
-                <span>Img</span>
+            <div  ref={this.sidebar} onClick={this.onAdd}>
+                <label>
+                    <span>Img</span>
+					<input type="file" onChange={this.onImageSelected} />
+                </label>
             </div>
        )
     }
@@ -319,7 +350,8 @@ class HoveringMenu extends React.Component {
                 const className = isSelected ? 'active' : null
                 const style = { display: 'block' }
                 return (
-                    <AlignmentImage src={src} className={className} alignment={alignment} onChange={this.alignmentChange.bind(editor)} style={style} {...attributes} />
+                	<img src={src}  alt=""/>
+                    //<AlignmentImage src={src} className={className} alignment={alignment} onChange={this.alignmentChange.bind(editor)} style={style} {...attributes} />
                 )
             }
         }
@@ -376,7 +408,7 @@ class HoveringMenu extends React.Component {
             onDrop={this.onDropOrPaste}
             onPaste={this.onDropOrPaste}
           />
-            <Sidebar  value={this.state.value} />
+            <Sidebar  value={this.state.value}  onChange={this.onChange} />
         </div>
       </div>
     )
